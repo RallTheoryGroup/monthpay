@@ -1,0 +1,25 @@
+name: MonthPay dependency gate
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Dependency gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+      - name: NuGet audit
+        if: always()
+        run: >-
+          dotnet restore src/MonthPay -p:NuGetAuditMode=all
+          -p:WarningsAsErrors=NU1900%3BNU1903%3BNU1904
